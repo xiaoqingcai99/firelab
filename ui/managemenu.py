@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_manawindow(object):
     def setupUi(self, manawindow):
         manawindow.setObjectName("manawindow")
-        manawindow.resize(1150, 600)
+        manawindow.resize(868, 532)
         self.centralwidget = QtWidgets.QWidget(manawindow)
         self.centralwidget.setObjectName("centralwidget")
         self.groupBox = QtWidgets.QGroupBox(self.centralwidget)

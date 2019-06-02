@@ -12,10 +12,13 @@ import sys
 from PyQt5.QtCore import *
 import copy
 
+
+import fire_state
+
 # 主界面
 class ManaMenu(QMainWindow,Ui_manawindow):
     def __init__(self):
-        super(ManaMenu,self).__init__()
+        super(ManaMenu, self).__init__()
         self.setupUi(self)
 
         self.exit.clicked.connect(self.exit1)
@@ -25,36 +28,11 @@ class ManaMenu(QMainWindow,Ui_manawindow):
         self.model = QStandardItemModel(N, N)
         self.tableView.setModel(self.model)
 
-        # 计时器
-        self.timer = QTimer()
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(self.refreshtime)
 
+        # self.textBrowser.append('Time:{0}(min)    Position: ({1},{2})'
+        #                         .format(t, x, y))
+        # del b_list[0]
 
-    def refreshtime(self):
-        global time, b_list,N,t,alist_len,alist
-        if len(b_list)==0:
-            b_list = copy.deepcopy(alist)
-        x = b_list[0][0]
-        y = b_list[0][1]
-        """
-        if x>N or y>N:
-            z = x-N
-            for j in (x-N):
-        """
-        self.model.setItem(x, y, QStandardItem('1'))
-        self.textBrowser.append('Time:{0}(min)    Position: ({1},{2})'
-                                .format(t, x, y))
-        del b_list[0]
-        if t == time:
-            self.timer.stop()
-            self.textBrowser.append('执行完毕，总时间：{0}（min）'.format(t))
-            return
-        t += 1
-        if len(b_list)==0:
-            self.timer.stop()
-            self.textBrowser.append('执行完毕，总时间：{0}（min）'.format(alist_len))
-            return
 
 
     def exit1(self):
@@ -71,59 +49,22 @@ class ManaMenu(QMainWindow,Ui_manawindow):
         para_insert.show()
 
     def resset(self):
+        global para_insert
         if self.insert.isEnabled()!=True:
             self.insert.setEnabled(1)
             self.model.clear()
-            global N,t
+            global N, initial_list
             t = 1
+            for z in range(N):
+                ii_list = []
+                for rep in range(N):
+                    ii_list.append(0)
+                initial_list.append(ii_list)
             self.model = QStandardItemModel(N, N)
+            para_insert.tablemodel = MyTableModel(initial_list)
             self.tableView.setModel(self.model)
             self.textBrowser.clear()
 
-    """
-    def paintGL(self):
-        # 20*20
-        global N,time,xp,yp
-
-        xgrid = gl.GLGridItem(size=QtGui.QVector3D(N, N, 1), color=(255, 255, 255))
-        self.openGLWidget.addItem(xgrid)
-
-
-
-        
-        axis = gl.GLAxisItem()
-        self.openGLWidget.addItem(axis)
-
-
-        global drawpal
-
-        # 创建一支画笔并设置属性
-        pen = QPen(Qt.red, 2, Qt.SolidLine)  # pen = QPen(【1】颜色, 【2】线条粗细, 【3】线条形式)
-        self.drawpal.setPen(pen)
-        self.drawpal.setBrush(QColor(255, 0, 0))
-
-        # 接着绘制各种图形
-        self.drawEllipse(self.openGLWidget)  # 绘制圆 椭圆
-        self.openGLWidget.drawRect(2,2,3,3)  ##绘制矩形
-        self.openGLWidget.drawRoundedRect(5,5,4,4, 1, 1)  # 绘制圆角矩形
-
-    
-        # 20*20
-        xgrid = gl.GLGridItem()
-        ygrid = gl.GLGridItem()
-        zgrid = gl.GLGridItem()
-        self.openGLWidget.addItem(xgrid)
-        self.openGLWidget.addItem(ygrid)
-        self.openGLWidget.addItem(zgrid)
-
-    
-
-    def use_gl(self):
-
-        # 自定义的方法
-
-        self.openGLWidget.paintGL = self.paintGL()
-"""
 
 
 # 输入数据
@@ -132,22 +73,90 @@ class Insert_Time(QWidget,Ui_insert_time):
         super(Insert_Time,self).__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.btnClick)  # 按钮事件绑定
+        self.tablemodel = 0
+
+    def refreshtime(self):
+        global time, N, alist
+        b_list = copy.deepcopy(alist)
+        # x = b_list[0][0]
+        # y = b_list[0][1]
+        """
+        if x>N or y>N:
+            z = x-N
+            for j in (x-N):
+        """
+        global initial_list, manamenu, xp, yp
+        if xp>0 and yp>0 and xp<N and yp<N:
+            initial_list[xp-1][yp-1] = 2
+        for key, value in b_list.items():
+            if key[0]<0 or key[1]<0 or key[0]>=N or key[1]>=N:
+                continue
+            if value == 1:
+                initial_list[key[0]][key[1]] = 1
+
+        self.tablemodel = MyTableModel(initial_list)
+        manamenu.tableView.setModel(self.tablemodel)
 
     # 子窗体自定义事件
     def btnClick(self):
-        global time, manamenu, xp, yp
-        if self.spinBox.value() != 0 and self.positionx.value() >= 0 and self.positiony.value() >= 0:
+        global time, manamenu, xp, yp, alist,initial_list
+        if self.spinBox.value() != 0 and self.positionx.value() >= 0 \
+                and self.positiony.value() >= 0 and self.spin_wind.value() >= 0 and self.spin_angle.value() >= 0:
             time = self.spinBox.value()
-            self.spinBox.setValue(0)
+            wind = self.spin_wind.value()
+            angle = self.spin_angle.value()
+            xp = self.positionx.value()
+            yp = self.positiony.value()
+            x = self.positionx.value()
+            x = x-1
+            y = self.positiony.value()
+            y = y-1
+            if wind == 0:
+                wind = 1
+            if angle == 0:
+                angle = 1
+            fire_state.clear_map()
+            alist = fire_state.cacl_map(wind, angle, (x, y), 1, 1, time, 0)
+
+            # self.spinBox.setValue(0)
             manamenu.insert.setDisabled(1)
             manamenu.textBrowser.append('执行中，请勿退出！')
-            manamenu.model.setItem(xp, yp, QStandardItem('1'))
-            manamenu.textBrowser.append('Time:{0}(min)    Position: ({1},{2})'
-                                    .format(0, xp, yp))
-            manamenu.timer.start()
+            self.refreshtime()
         else:
             reply = QMessageBox.information(self, "注意", "您未输入完整参数", QMessageBox.Yes)
         self.close()
+
+
+
+#模型
+class MyTableModel(QAbstractTableModel):
+    def __init__(self, datain, parent=None, *args):
+        QAbstractTableModel.__init__(self, parent, *args)
+        self.arraydata = datain
+
+    def rowCount(self, parent):
+        return len(self.arraydata)
+
+    def columnCount(self, parent):
+        return len(self.arraydata[0])
+
+    def data(self, index, role):
+        if not index.isValid():
+            return QVariant()
+            # vvvv this is the magic part
+        elif role == Qt.BackgroundRole:
+            #if self.arraydata[index.row()][index.column()] == 1:
+            if self.arraydata[index.row()][index.column()] == 1:
+                return QBrush(Qt.red)
+            if self.arraydata[index.row()][index.column()] == 2:
+                return QBrush(Qt.yellow)
+            else:
+                return QVariant()
+            # ^^^^ this is the magic part
+        elif role != Qt.DisplayRole:
+            return QVariant()
+        return QVariant()
+
 
 
 # 登录
@@ -196,13 +205,18 @@ if  __name__=="__main__":
     time = 0
     xp = 0
     yp = 0
-    alist = [
-        [0,1],
-        [0,2]
-    ]
+    alist = dict()
+
+    # pos = fire_state.cacl_map(2, 15, (5, 6), 1, 1, 5, 0)
+    # alist = pos
+    # # [
+    # #     [0,1],
+    # #     [0,2]
+    # # ]
     b_list = copy.deepcopy(alist)
     alist_len = len(alist)
     t = 1
+    initial_list = []
 
     app=QtWidgets.QApplication(sys.argv)
 
@@ -213,6 +227,12 @@ if  __name__=="__main__":
     manamenu = ManaMenu()
 
     para_insert = Insert_Time()
+
+    for z in range(N):
+        ii_list = []
+        for rep in range(N):
+            ii_list.append(0)
+        initial_list.append(ii_list)
 
     # 点击登录
     manalog = ui.logon

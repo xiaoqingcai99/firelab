@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1150</width>
-    <height>616</height>
+    <width>868</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,6 +35,9 @@
        <height>521</height>
       </rect>
      </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>30</number>
+     </attribute>
     </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
@@ -110,8 +113,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1150</width>
-     <height>23</height>
+     <width>868</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>
